@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ChatGateway } from './app.gateway';
+import { ChatGateway } from './chat.gateway';
 
 describe('ChatGateway', () => {
 	let gateway: ChatGateway;

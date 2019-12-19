@@ -16,7 +16,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 
 	handleDisconnect(client: Socket) {
 		if (this.mainClientConnected && client.id === this.mainClient.id) {
-			// broadcasting main client is off to client list members
+			// ! TODO: broadcasting main client is off to client list members
 			this.logger.log('[handleDisconnect] Main client disconnected');
 		} else {
 			this.clientsList = this.clientsList.filter(fclient => {
@@ -26,30 +26,33 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				}
 				return true;
 			});
-			// tell main client of hte new list
+			// tell main client of the new list
 			if (this.mainClientConnected) { // if main client is connected
-				this.mainClient.emit('online_clients', { connectedClients: this.clientsList.map(fclient => fclient.username) });
+				this.mainClient.emit('online_clients', {
+					connectedClients: this.clientsList.map(fclient => {
+						return { username: fclient.username, sourceSocketId: fclient.client.id };
+					}),
+				});
 			}
 
 		}
 	}
 
 	@SubscribeMessage('messageFromMainClientToServer')
-	handleMessageFromMainClient(client: Socket, data: string): WsResponse<string> | void {
-		this.logger.log(this.clientsList.length);
-		// if (target) {
-		// 	this.logger.log(target.emit('messageFromMainClientToClient', data));
-		// }
+	handleMessageFromMainClient(client: Socket, data: { userSourceSocketId: string, userId: string, username: string, body: string }): WsResponse<string> | void {
+		const target = this.clientsList.find(fclient => fclient.client.id === data.userSourceSocketId);
+		if (target) {
+			target.client.emit('messageFromMainClientToClient', { body: data.body });
+			// ! TODO: delete target variable;
+		}
+		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };
 	}
 
 	@SubscribeMessage('messageFromClientToServer')
 	handleMessageFromClient(client: Socket, text: string): WsResponse<string> {
-		this.mainClient.emit('messageFromClientToMainClient', text);
+		this.mainClient.emit('messageFromClientToMainClient', { body: text, admin: false, date: new Date().toDateString(), sourceSocketId: client.id });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
-
-
-
 
 	@SubscribeMessage('messageInitFromClient')
 	handleInitMessageFromClient(client: Socket, username: string): WsResponse<{ mainClientIsConnected: boolean }> {
@@ -60,18 +63,28 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		});
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected
-			this.mainClient.emit('online_clients', { connectedClients: this.clientsList.map(fclient => fclient.username) });
-		}
+			this.mainClient.emit('online_clients', {
+				connectedClients: this.clientsList.map(fclient => {
+					return { username: fclient.username, sourceSocketId: fclient.client.id };
+				}),
+			});
+		} // ! TODO: put it in the db for main client as unread
 
 		// tell client the status of the main client
 		return { event: 'messageFromServerToClient', data: { mainClientIsConnected: this.mainClientConnected } };
 	}
 
 	@SubscribeMessage('messageInitFromMainClient')
-	handleInitMessageFromMainClient(client: Socket, text: string): WsResponse<{ connectedClients: string[] }> {
+	handleInitMessageFromMainClient(client: Socket, text: string): WsResponse<{ connectedClients: Array<{ username: string, sourceSocketId: string }> }> {
 		this.logger.log('Main client connected: ' + text);
 		this.mainClientConnected = true;
 		this.mainClient = client;
-		return { event: 'online_clients', data: { connectedClients: this.clientsList.map(fclient => fclient.username) } };
+		return {
+			event: 'online_clients', data: {
+				connectedClients: this.clientsList.map(fclient => {
+					return { username: fclient.username, sourceSocketId: fclient.client.id };
+				}),
+			},
+		};
 	}
 }

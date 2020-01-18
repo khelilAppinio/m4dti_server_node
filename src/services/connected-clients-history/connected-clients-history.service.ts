@@ -5,15 +5,22 @@ import { ConnectedClientsHistory } from '../../models/connected-clients-history.
 @Injectable()
 export class ConnectedClientsHistoryService {
 
-	constructor(@InjectModel('ConnectedClientsHistory') private readonly connectedClientsHistoryModel: Model<ConnectedClientsHistory>) {}
+	constructor(@InjectModel('ConnectedClientsHistory') private readonly connectedClientsHistoryModel: Model<ConnectedClientsHistory>) { }
 	public async update(username: string, isConnected: boolean, socketID: string): Promise<ConnectedClientsHistory> {// ! TODO: need a DTO here
-		
-		const connectedClientsHistory = new this.connectedClientsHistoryModel({
-			username,
-			isConnected,
-			socketID,
-		});
+		const foundUsername = await this.findByUsername(username);
+		if (foundUsername) {
+			return await this.connectedClientsHistoryModel.updateOne({ username }, { isConnected, socketID }).exec();
+		} else {
+			const connectedClientsHistory = new this.connectedClientsHistoryModel({
+				username,
+				isConnected,
+				socketID,
+			});
+			return await connectedClientsHistory.save();
+		}
+	}
 
-		return await connectedClientsHistory.save();
+	private async findByUsername(username: string): Promise<ConnectedClientsHistory> {
+		return this.connectedClientsHistoryModel.findOne({ username }).exec();
 	}
 }

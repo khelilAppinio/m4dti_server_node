@@ -1,6 +1,7 @@
 import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
+import { ConnectedClientsHistoryService } from '../services/connected-clients-history/connected-clients-history.service';
 
 @WebSocketGateway(4444) // WebSocket port number: 4444
 export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can implemet also OnGatewayConnection
@@ -10,6 +11,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	private mainClientConnected = false;
 	private clientsList: Array<{ client: Socket, username: string }> = [];
 
+	constructor(private connectedClientsHistoryService: ConnectedClientsHistoryService) {}
 	afterInit(server: Server) {
 		this.logger.log('ChatGetway init');
 	}
@@ -61,6 +63,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			username,
 			client,
 		});
+		this.connectedClientsHistoryService.update(username, true, client.id).then( res => this.logger.log('res')).catch( err => this.logger.warn('err'));
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected
 			this.mainClient.emit('online_clients', {

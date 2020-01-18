@@ -12,4 +12,12 @@ export class MessageService {
 		const createdMessage = new this.messageModel(createMessageDto);
 		return createdMessage.save();
 	}
+
+	async getClientMessagesById(username: string): Promise<Message[]> {
+		return this.messageModel.find({username, isAdmin: true});
+	}
+
+	async getMainClientMessagesById(username: string): Promise<Message[]> {
+		return this.messageModel.find({username, isAdmin: false});
+	}
 }

@@ -2,6 +2,8 @@ import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewa
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { ConnectedClientsHistoryService } from '../services/connected-clients-history/connected-clients-history.service';
+import { MessageService } from '../services/message/message.service';
+import { DataFromMainClient } from '../types/emittable';
 
 @WebSocketGateway(4444) // WebSocket port number: 4444
 export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can implemet also OnGatewayConnection
@@ -11,7 +13,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	private mainClientConnected = false;
 	private clientsList: Array<{ client: Socket, username: string }> = [];
 
-	constructor(private connectedClientsHistoryService: ConnectedClientsHistoryService) {}
+	constructor(
+		private readonly connectedClientsHistoryService: ConnectedClientsHistoryService,
+		private readonly messageService: MessageService,
+	) {}
 	afterInit(server: Server) {
 		this.logger.log('ChatGetway init');
 	}
@@ -44,24 +49,28 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	}
 
 	@SubscribeMessage('messageFromMainClientToServer')
-	handleMessageFromMainClient(client: Socket, data: { userSourceSocketId: string, userId: string, username: string, body: string }): WsResponse<string> | void {
+	handleMessageFromMainClient(client: Socket, data: DataFromMainClient): WsResponse<string> | void {
 		const target = this.clientsList.find(fclient => fclient.client.id === data.userSourceSocketId);
 		if (target) {
+			const date = new Date().getTime();
 			target.client.emit('messageFromMainClientToClient', { body: data.body });
-			// ! TODO: delete target variable;
+			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date });
 		}
 		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };
 	}
 
 	@SubscribeMessage('messageFromClientToServer')
 	handleMessageFromClient(client: Socket, data: {text: string, username: string}): WsResponse<string> {
-		// this.logger.log(data, 'mssg from client to main cleint');
+		const date = new Date().getTime();
+		// ! TODO: make sure is emitted
 		this.mainClient.emit('messageFromClientToMainClient', {
 			body: data.text,
 			admin: false,
-			date: new Date().toDateString(),
+			date,
 			sourceSocketId: client.id,
 		});
+		// persist message in the db
+		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
 

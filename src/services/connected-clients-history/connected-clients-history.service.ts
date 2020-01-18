@@ -7,7 +7,7 @@ export class ConnectedClientsHistoryService {
 
 	constructor(@InjectModel('ConnectedClientsHistory') private readonly connectedClientsHistoryModel: Model<ConnectedClientsHistory>) { }
 	public async update(username: string, isConnected: boolean, socketID: string): Promise<ConnectedClientsHistory> {// ! TODO: need a DTO here
-		const foundUsername = await this.findByUsername(username);
+		const foundUsername = await this.findById(username);
 		if (foundUsername) {
 			return await this.connectedClientsHistoryModel.updateOne({ username }, { isConnected, socketID }).exec();
 		} else {
@@ -20,7 +20,7 @@ export class ConnectedClientsHistoryService {
 		}
 	}
 
-	private async findByUsername(username: string): Promise<ConnectedClientsHistory> {
+	private async findById(username: string): Promise<ConnectedClientsHistory> { // ! TODO: need to be ID not Username
 		return this.connectedClientsHistoryModel.findOne({ username }).exec();
 	}
 }

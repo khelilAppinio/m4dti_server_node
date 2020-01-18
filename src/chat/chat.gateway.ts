@@ -24,6 +24,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			this.clientsList = this.clientsList.filter(fclient => {
 				if (fclient.client.id === client.id) {
 					this.logger.log('[handleDisconnect] client disconnected: ' + fclient.username);
+					this.connectedClientsHistoryService.update(fclient.username, false, undefined)
+						.then( res => { })
+						.catch( err => this.logger.warn('err'));
 					return false;
 				}
 				return true;
@@ -51,8 +54,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	}
 
 	@SubscribeMessage('messageFromClientToServer')
-	handleMessageFromClient(client: Socket, text: string): WsResponse<string> {
-		this.mainClient.emit('messageFromClientToMainClient', { body: text, admin: false, date: new Date().toDateString(), sourceSocketId: client.id });
+	handleMessageFromClient(client: Socket, data: {text: string, username: string}): WsResponse<string> {
+		// this.logger.log(data, 'mssg from client to main cleint');
+		this.mainClient.emit('messageFromClientToMainClient', {
+			body: data.text,
+			admin: false,
+			date: new Date().toDateString(),
+			sourceSocketId: client.id,
+		});
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
 
@@ -63,7 +72,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			username,
 			client,
 		});
-		this.connectedClientsHistoryService.update(username, true, client.id).then( res => this.logger.log('res')).catch( err => this.logger.warn('err'));
+		// ! TODO: handle error
+		this.connectedClientsHistoryService.update(username, true, client.id)
+			.then( res => { })
+			.catch( err => this.logger.warn('err'));
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected
 			this.mainClient.emit('online_clients', {

@@ -6,18 +6,19 @@ import { CreateMessageDto } from '../../dtos/create-message-dto';
 
 @Injectable()
 export class MessageService {
-	constructor(@InjectModel('Message') private readonly messageModel: Model<Message>) {}
+	constructor(@InjectModel('Message') private readonly messageModel: Model<Message>) { }
 
 	async create(createMessageDto: CreateMessageDto): Promise<Message> {
 		const createdMessage = new this.messageModel(createMessageDto);
 		return createdMessage.save();
 	}
 
-	async getClientMessagesById(username: string): Promise<Message[]> {
-		return this.messageModel.find({username, isAdmin: true});
+	async getMessagesById(username: string, isAdmin: boolean): Promise<Message[]> {
+		if (typeof isAdmin === 'undefined') {
+			return this.messageModel.find({ username });
+		} else {
+			return this.messageModel.find({ username, isAdmin });
+		}
 	}
 
-	async getMainClientMessagesById(username: string): Promise<Message[]> {
-		return this.messageModel.find({username, isAdmin: false});
-	}
 }

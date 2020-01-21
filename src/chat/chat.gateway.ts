@@ -54,6 +54,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		if (target) {
 			const date = new Date().getTime();
 			target.client.emit('messageFromMainClientToClient', { body: data.body });
+			// persist message in the db
 			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date });
 		}
 		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };

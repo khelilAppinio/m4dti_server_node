@@ -16,7 +16,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	constructor(
 		private readonly connectedClientsHistoryService: ConnectedClientsHistoryService,
 		private readonly messageService: MessageService,
-	) {}
+	) { }
 	afterInit(server: Server) {
 		this.logger.log('ChatGetway init');
 	}
@@ -30,8 +30,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				if (fclient.client.id === client.id) {
 					this.logger.log('[handleDisconnect] client disconnected: ' + fclient.username);
 					this.connectedClientsHistoryService.update(fclient.username, false, undefined)
-						.then( res => { })
-						.catch( err => this.logger.warn('err'));
+						.then(res => { })
+						.catch(err => this.logger.warn('err'));
 					return false;
 				}
 				return true;
@@ -55,23 +55,32 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			const date = new Date().getTime();
 			target.client.emit('messageFromMainClientToClient', { body: data.body });
 			// persist message in the db
-			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date });
+			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date, mediaUrl: undefined });
 		}
 		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };
 	}
 
 	@SubscribeMessage('messageFromClientToServer')
-	handleMessageFromClient(client: Socket, data: {text: string, username: string}): WsResponse<string> {
+	handleMessageFromClient(client: Socket, data: { text: string, username: string }): WsResponse<string> {
+		let emitted: boolean;
 		const date = new Date().getTime();
+
 		// ! TODO: make sure is emitted
-		this.mainClient.emit('messageFromClientToMainClient', {
-			body: data.text,
-			admin: false,
-			date,
-			sourceSocketId: client.id,
-		});
+		try {
+			emitted = this.mainClient.emit('messageFromClientToMainClient', {
+				body: data.text,
+				admin: false,
+				date,
+				sourceSocketId: client.id,
+			});
+			this.logger.log(emitted, 'handleMessageFromClient - emitted');
+		} catch (error) {
+			this.logger.error(error, 'handleMessageFromClient');
+		}
+
+		this.logger.log(emitted, 'handleMessageFromClient - emitted');
 		// persist message in the db
-		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date });
+		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date, mediaUrl: undefined });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
 
@@ -84,8 +93,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		});
 		// ! TODO: handle error
 		this.connectedClientsHistoryService.update(username, true, client.id)
-			.then( res => { })
-			.catch( err => this.logger.warn('err'));
+			.then(res => { })
+			.catch(err => this.logger.warn('err'));
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected
 			this.mainClient.emit('online_clients', {
@@ -111,5 +120,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				}),
 			},
 		};
+	}
+
+	public sendMedia(mediaUrl: string, destination: string, date: number) {
+		// verify if main client is online otherwise set message as unread and persist
+		if (this.mainClientConnected) {
+			this.mainClient.emit('messageFromClientToMainClient', {
+				body: undefined, // ! TODO: add these featuer later
+				admin: false,
+				date,
+				mediaUrl,
+				sourceSocketId: destination,
+			});
+		} // else...
+
 	}
 }

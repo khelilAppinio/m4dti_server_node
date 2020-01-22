@@ -3,4 +3,5 @@ export interface Message {
 	body: string;
 	date: number; // TODO: change to switable type.
 	username: string; // TODO change to uniqueId
+	mediaUrl: string;
 }

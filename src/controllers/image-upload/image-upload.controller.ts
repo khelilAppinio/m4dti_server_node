@@ -7,7 +7,6 @@ import { Response } from 'express';
 export class ImageUploadController {
 	@Post()
 	writeImage(@Body('data') data: string, @Res() res: Response) {
-		Logger.log('requesting', 'writeImage');
 		fs.writeFile(
 			path.join(__dirname, '../../../public/uploaded_images/1234.jpeg'),
 			data.replace(/^data:image\/jpeg;base64,/, ''),

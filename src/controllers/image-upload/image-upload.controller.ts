@@ -5,13 +5,9 @@ import { Response } from 'express';
 
 @Controller('image-upload')
 export class ImageUploadController {
-	@Get('ping')
-	testRoute() {
-		return 'route working!';
-	}
 	@Post()
 	writeImage(@Body('data') data: string, @Res() res: Response) {
-		Logger.log('requesting', 'writeImage')
+		Logger.log('requesting', 'writeImage');
 		fs.writeFile(
 			path.join(__dirname, '../../../public/uploaded_images/1234.jpeg'),
 			data.replace(/^data:image\/jpeg;base64,/, ''),
@@ -20,7 +16,6 @@ export class ImageUploadController {
 					Logger.error(error);
 					return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
 				}
-				
 				return res.status(HttpStatus.OK).send();
 		});
 	}

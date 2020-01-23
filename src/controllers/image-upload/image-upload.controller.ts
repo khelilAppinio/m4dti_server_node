@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, HttpStatus, Logger, Get } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpStatus, Logger, Get, Header } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Response } from 'express';
@@ -10,6 +10,7 @@ export class ImageUploadController {
 
 	constructor(private readonly messageService: MessageService, private readonly chatGateway: ChatGateway) {}
 	@Post()
+	@Header('Access-Control-Allow-Origin', '*')
 	writeImage(@Body('data') data: string, @Body('sourceSocketId') sourceSocketId: string, @Res() res: Response) {
 		// ! TODO: use regex to filter png|jpeg|jpg ..
 		// ! TODO: save in the db as message
@@ -17,11 +18,12 @@ export class ImageUploadController {
 		// ! TODO: validate data
 		// ! TODO: add remove image feature for both front and back
 		// ! TODO: send media url to the destination
+		// ! TODO: verify image too large
 		const imgId = uuid();
 		const date = new Date().getTime();
 		fs.writeFile(
-			path.join(__dirname, `../../../public/uploaded_images/${imgId}.jpeg`),
-			data.replace(/^data:image\/jpeg;base64,/, ''),
+			path.join(__dirname, `../../../public/uploaded_images/${imgId}.png`),
+			data.replace(/^data:image\/png;base64,/, ''),
 			'base64', (error) => {
 				if (error) {
 					Logger.error(error);

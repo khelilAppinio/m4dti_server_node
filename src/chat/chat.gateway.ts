@@ -62,23 +62,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 
 	@SubscribeMessage('messageFromClientToServer')
 	handleMessageFromClient(client: Socket, data: { text: string, username: string }): WsResponse<string> {
-		let emitted: boolean;
+		let emitted = false;
 		const date = new Date().getTime();
+		this.logger.log(this.mainClient.id, 'messageFromClientToServer - main client id');
 
 		// ! TODO: make sure is emitted
-		try {
-			emitted = this.mainClient.emit('messageFromClientToMainClient', {
-				body: data.text,
-				admin: false,
-				date,
-				sourceSocketId: client.id,
-			});
-			this.logger.log(emitted, 'handleMessageFromClient - emitted');
-		} catch (error) {
-			this.logger.error(error, 'handleMessageFromClient');
-		}
+		this.mainClient.emit('messageFromClientToMainClient', {
+			body: data.text,
+			admin: false,
+			date,
+			sourceSocketId: client.id,
+			mediaUrl: undefined,
+		});
+		this.logger.log(data, 'handleMessageFromClient - emitted');
 
-		this.logger.log(emitted, 'handleMessageFromClient - emitted');
 		// persist message in the db
 		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date, mediaUrl: undefined });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
@@ -123,7 +120,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	}
 
 	public sendMedia(mediaUrl: string, destination: string, date: number) {
-		// verify if main client is online otherwise set message as unread and persist
+		// ! TODO: verify if main client is online otherwise set message as unread and persist
 		if (this.mainClientConnected) {
 			this.mainClient.emit('messageFromClientToMainClient', {
 				body: undefined, // ! TODO: add these featuer later

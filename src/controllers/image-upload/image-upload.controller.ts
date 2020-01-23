@@ -5,13 +5,20 @@ import { Response } from 'express';
 import * as uuid from 'uuid/v4';
 import { MessageService } from '../../services/message/message.service';
 import { ChatGateway } from '../../chat/chat.gateway';
+import { ENV } from 'src/env/environment';
 @Controller('image-upload')
 export class ImageUploadController {
 
-	constructor(private readonly messageService: MessageService, private readonly chatGateway: ChatGateway) {}
+	constructor(private readonly messageService: MessageService, private readonly chatGateway: ChatGateway) { }
 	@Post()
 	@Header('Access-Control-Allow-Origin', '*')
-	writeImage(@Body('data') data: string, @Body('sourceSocketId') sourceSocketId: string, @Res() res: Response) {
+	// ! TODO: need a dto here
+	writeImage(
+		@Body('data') data: string,
+		@Body('sourceSocketId') sourceSocketId: string,
+		@Body('username') username: string,
+		@Res() res: Response,
+	) {
 		// ! TODO: use regex to filter png|jpeg|jpg ..
 		// ! TODO: save in the db as message
 		// ! TODO: get sourceSocketId from client
@@ -21,8 +28,9 @@ export class ImageUploadController {
 		// ! TODO: verify image too large
 		const imgId = uuid();
 		const date = new Date().getTime();
+		const imgExtension = 'png';
 		fs.writeFile(
-			path.join(__dirname, `../../../public/uploaded_images/${imgId}.png`),
+			path.join(__dirname, `../../../public/uploaded_images/${imgId}.${imgExtension}`),
 			data.replace(/^data:image\/png;base64,/, ''),
 			'base64', (error) => {
 				if (error) {
@@ -30,8 +38,9 @@ export class ImageUploadController {
 					return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
 				}
 				// send recieved media from a client to the main client
-				this.chatGateway.sendMedia(imgId, sourceSocketId, date);
-				return res.status(HttpStatus.OK).send({imgId});
-		});
+				const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_images/${imgId}.${imgExtension}`;
+				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date);
+				return res.status(HttpStatus.OK).send({mediaUrl});
+			});
 	}
 }

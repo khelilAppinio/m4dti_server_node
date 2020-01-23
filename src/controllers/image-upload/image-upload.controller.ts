@@ -15,16 +15,14 @@ export class ImageUploadController {
 	// ! TODO: need a dto here
 	writeImage(
 		@Body('data') data: string,
+		// * get sourceSocketId from client
 		@Body('sourceSocketId') sourceSocketId: string,
 		@Body('username') username: string,
 		@Res() res: Response,
 	) {
 		// ! TODO: use regex to filter png|jpeg|jpg ..
-		// ! TODO: save in the db as message
-		// ! TODO: get sourceSocketId from client
 		// ! TODO: validate data
 		// ! TODO: add remove image feature for both front and back
-		// ! TODO: send media url to the destination
 		// ! TODO: verify image too large
 		const imgId = uuid();
 		const date = new Date().getTime();
@@ -39,6 +37,7 @@ export class ImageUploadController {
 				}
 				// send recieved media from a client to the main client
 				const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_images/${imgId}.${imgExtension}`;
+				// * send media url to the destination
 				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
 				return res.status(HttpStatus.OK).send({mediaUrl});
 			});

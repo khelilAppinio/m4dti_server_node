@@ -129,7 +129,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				mediaUrl,
 				sourceSocketId: destination,
 			});
-		} // else...
+		} // ? else...
+		// * save in the db as message
 		this.messageService.create({ isAdmin: false, username, body: undefined, date, mediaUrl });
 	}
 }

@@ -119,7 +119,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		};
 	}
 
-	public sendMedia(mediaUrl: string, destination: string, date: number) {
+	public sendMedia(mediaUrl: string, destination: string, date: number, username: string) {
 		// ! TODO: verify if main client is online otherwise set message as unread and persist
 		if (this.mainClientConnected) {
 			this.mainClient.emit('messageFromClientToMainClient', {
@@ -130,6 +130,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				sourceSocketId: destination,
 			});
 		} // else...
-
+		this.messageService.create({ isAdmin: false, username, body: undefined, date, mediaUrl });
 	}
 }

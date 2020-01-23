@@ -39,7 +39,7 @@ export class ImageUploadController {
 				}
 				// send recieved media from a client to the main client
 				const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_images/${imgId}.${imgExtension}`;
-				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date);
+				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
 				return res.status(HttpStatus.OK).send({mediaUrl});
 			});
 	}

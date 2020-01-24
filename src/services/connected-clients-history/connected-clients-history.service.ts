@@ -23,4 +23,9 @@ export class ConnectedClientsHistoryService {
 	private async findById(username: string): Promise<ConnectedClientsHistory> { // ! TODO: need to be ID not Username
 		return this.connectedClientsHistoryModel.findOne({ username }).exec();
 	}
+
+	public async 	findAllConnectedClientsHistory(isConnected?: boolean) {
+		return (typeof isConnected === 'undefined') ? this.connectedClientsHistoryModel.find().exec()
+			: this.connectedClientsHistoryModel.find({ isConnected }).exec();
+	}
 }

@@ -5,6 +5,7 @@ import { ConnectedClientsHistoryModule } from './modules/connected-clients-histo
 import { MessageModule } from './modules/message/message.module';
 import { ImageUploadController } from './controllers/image-upload/image-upload.controller';
 import { ConnectedClientsHistoryController } from './controllers/connected-clients-history/connected-clients-history.controller';
+import { AudioUploadController } from './controllers/audio-upload/audio-upload.controller';
 
 @Module({
 	imports: [
@@ -12,7 +13,7 @@ import { ConnectedClientsHistoryController } from './controllers/connected-clien
 		ConnectedClientsHistoryModule,
 		MessageModule,
 	],
-	controllers: [ImageUploadController, ConnectedClientsHistoryController],
+	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
 	providers: [ChatGateway],
 })
 export class AppModule { }

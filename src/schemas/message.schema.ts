@@ -6,4 +6,5 @@ export const MessageSchema = new mongoose.Schema({
 	date: Number, // TODO: change to switable type.
 	username: String, // TODO change to uniqueId
 	mediaUrl: String,
+	unread: Boolean,
 });

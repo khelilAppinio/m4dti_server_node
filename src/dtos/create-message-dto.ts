@@ -10,4 +10,6 @@ export class CreateMessageDto {
 	readonly username: string; // TODO change to uniqueId
 	@IsString()
 	readonly mediaUrl: string;
+	@IsBoolean()
+	readonly unread: boolean;
 }

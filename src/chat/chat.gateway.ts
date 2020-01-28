@@ -55,7 +55,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			const date = new Date().getTime();
 			target.client.emit('messageFromMainClientToClient', { body: data.body });
 			// persist message in the db
-			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date, mediaUrl: undefined });
+			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date, mediaUrl: undefined, unread: true });
 		}
 		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };
 	}
@@ -77,7 +77,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		this.logger.log(data, 'handleMessageFromClient - emitted');
 
 		// persist message in the db
-		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date, mediaUrl: undefined });
+		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date, mediaUrl: undefined, unread: true });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
 
@@ -106,6 +106,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 	}
 
 	@SubscribeMessage('messageInitFromMainClient')
+	// tslint:disable-next-line: max-line-length
 	handleInitMessageFromMainClient(client: Socket, text: string): WsResponse<{ connectedClients: Array<{ username: string, sourceSocketId: string }> }> {
 		this.logger.log('Main client connected: ' + text);
 		this.mainClientConnected = true;
@@ -131,6 +132,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			});
 		} // ? else...
 		// * save in the db as message
-		this.messageService.create({ isAdmin: false, username, body: undefined, date, mediaUrl });
+		this.messageService.create({ isAdmin: false, username, body: undefined, date, mediaUrl, unread: true });
 	}
 }

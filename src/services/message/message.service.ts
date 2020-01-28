@@ -26,4 +26,7 @@ export class MessageService {
 		}
 	}
 
+	async setAllReadToTrue(id: string) {
+		return this.messageModel.updateMany({unread: true, username: id}, {unread: false});
+	}
 }

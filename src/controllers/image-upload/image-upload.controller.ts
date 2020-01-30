@@ -26,20 +26,28 @@ export class ImageUploadController {
 		// ! TODO: verify image too large
 		const imgId = uuid();
 		const date = new Date().getTime();
-		const imgExtension = 'png';
-		fs.writeFile(
-			path.join(__dirname, `../../../public/uploaded_images/${imgId}.${imgExtension}`),
-			data.replace(/^data:image\/png;base64,/, ''),
-			'base64', (error) => {
-				if (error) {
-					Logger.error(error);
-					return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
-				}
-				// send recieved media from a client to the main client
-				const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_images/${imgId}.${imgExtension}`;
-				// * send media url to the destination
-				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
-				return res.status(HttpStatus.OK).send({mediaUrl});
-			});
+		const match = data.slice(0, 20).match(/(png|jpg|jpeg)/);
+		if (match) {
+			const imgExtension = match[0];
+			const regex = new RegExp(`^data:image\/${imgExtension};base64,`);
+			fs.writeFile(
+				path.join(__dirname, `../../../public/uploaded_images/${imgId}.${imgExtension}`),
+				data.replace(regex, ''),
+				'base64', (error) => {
+					if (error) {
+						Logger.error(error);
+						return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
+					}
+					// send recieved media from a client to the main client
+					const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_images/${imgId}.${imgExtension}`;
+					// * send media url to the destination
+					this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
+					return res.status(HttpStatus.OK).send({ mediaUrl });
+				},
+			);
+		} else {
+			return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
+		}
+
 	}
 }

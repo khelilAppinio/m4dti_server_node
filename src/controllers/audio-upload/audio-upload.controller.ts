@@ -26,20 +26,27 @@ export class AudioUploadController {
 		// ! TODO: verify audio too large
 		const audioId = uuid();
 		const date = new Date().getTime();
-		const audioExtension = '3gpp';
-		fs.writeFile(
-			path.join(__dirname, `../../../public/uploaded_audios/${audioId}.${audioExtension}`),
-			data.replace(/^data:video\/3gpp;base64,/, ''),
-			'base64', (error) => {
-				if (error) {
-					Logger.error(error);
-					return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
-				}
-				// send recieved media from a client to the main client
-				const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_audios/${audioId}.${audioExtension}`;
-				// * send media url to the destination
-				this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
-				return res.status(HttpStatus.OK).send({mediaUrl});
-			});
+		const match = data.slice(0, 20).match(/(3gpp)/);
+		if (match) {
+			const audioExtension = '3gpp';
+			fs.writeFile(
+				path.join(__dirname, `../../../public/uploaded_audios/${audioId}.${audioExtension}`),
+				data.replace(/^data:video\/3gpp;base64,/, ''),
+				'base64', (error) => {
+					if (error) {
+						Logger.error(error);
+						return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
+					}
+					// send recieved media from a client to the main client
+					const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_audios/${audioId}.${audioExtension}`;
+					// * send media url to the destination
+					this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
+					return res.status(HttpStatus.OK).send({ mediaUrl });
+				},
+			);
+		} else {
+			return res.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).send();
+		}
+
 	}
 }

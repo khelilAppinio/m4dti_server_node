@@ -6,12 +6,14 @@ import { MessageModule } from './modules/message/message.module';
 import { ImageUploadController } from './controllers/image-upload/image-upload.controller';
 import { ConnectedClientsHistoryController } from './controllers/connected-clients-history/connected-clients-history.controller';
 import { AudioUploadController } from './controllers/audio-upload/audio-upload.controller';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
 	imports: [
 		MongooseModule.forRoot('mongodb://localhost/nestFirst'),
 		ConnectedClientsHistoryModule,
 		MessageModule,
+		AuthModule,
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
 	providers: [ChatGateway],

@@ -5,7 +5,7 @@ import { User } from '../../models/users.model';
 import { Model } from 'mongoose';
 import { genSalt, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from '../../models/jwt-payload.model';
+import { JwtPayload } from '../../types/jwt-payload.type';
 @Injectable()
 export class AuthService {
 	constructor(

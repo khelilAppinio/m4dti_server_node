@@ -1,9 +1,12 @@
-import { Controller, Post, Get, Body, Logger, UseFilters, BadRequestException, ValidationPipe, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Logger, UseFilters, BadRequestException, ValidationPipe, UnauthorizedException, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuthCredentialsDto } from '../../dtos/auth-credentials.dto';
 import { MongoExceptionFilter } from '../../exception-filters/mongo.ef';
 import { MongoError } from 'mongodb';
 import { UnauthorizedFilter } from '../../exception-filters/unauthorized.filter';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../../decorators/get-user.decorator';
+import { User } from '../../models/users.model';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +33,12 @@ export class AuthController {
 					throw new UnauthorizedException(error);
 				}
 			});
+	}
+
+	@Get('test')
+	@UseGuards(AuthGuard())
+	testAuth(@GetUser() user: User) {
+		console.log(user);
 	}
 
 }

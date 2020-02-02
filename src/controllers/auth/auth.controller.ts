@@ -3,7 +3,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { AuthCredentialsDto } from '../../dtos/auth-credentials.dto';
 import { MongoExceptionFilter } from '../../exception-filters/mongo.ef';
 import { MongoError } from 'mongodb';
-import { UnauthorizedFilter } from '../../exception-filters/bad-request.filter';
+import { UnauthorizedFilter } from '../../exception-filters/unauthorized.filter';
 
 @Controller('auth')
 export class AuthController {

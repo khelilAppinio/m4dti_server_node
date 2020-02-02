@@ -4,25 +4,32 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../../models/users.model';
 import { Model } from 'mongoose';
 import { genSalt, hash } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from '../../models/jwt-payload.model';
 @Injectable()
 export class AuthService {
-	constructor(@InjectModel('User') private readonly userModel: Model<User>) { }
+	constructor(
+		@InjectModel('User') private readonly userModel: Model<User>,
+		private readonly jwtService: JwtService,
+	) { }
 	async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
 		const salt = await genSalt();
-		const createduser = new this.userModel({...authCredentialsDto, salt});
+		const createduser = new this.userModel({ ...authCredentialsDto, salt });
 		createduser.password = await hash(createduser.password, salt);
 		return createduser.save();
 	}
-	async signIn(authCredentialsDto: AuthCredentialsDto) {
+	async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string | { accessToken: string }> {
 		const isPasswordValid = await this.validateUserPassword(authCredentialsDto.username, authCredentialsDto.password);
 		if (isPasswordValid) {
-			return 'bearer';
+			const payload: JwtPayload = { username: authCredentialsDto.username};
+			const accessToken = this.jwtService.sign(payload);
+			return Promise.resolve({accessToken});
 		} else {
 			return Promise.reject('Invalid credentials');
 		}
 	}
 	private async validateUserPassword(username: string, password: string): Promise<boolean> {
-		const user = await this.userModel.findOne({username});
+		const user = await this.userModel.findOne({ username });
 		return (user && await hash(password, user.salt) === user.password);
 	}
 }

@@ -6,24 +6,33 @@ import { Model } from 'mongoose';
 import { genSalt, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../../types/jwt-payload.type';
+import { MongoError } from 'mongodb';
+
 @Injectable()
 export class AuthService {
 	constructor(
 		@InjectModel('User') private readonly userModel: Model<User>,
 		private readonly jwtService: JwtService,
 	) { }
-	async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
+	async signUp(authCredentialsDto: AuthCredentialsDto): Promise<{ accessToken: string } | MongoError> {
 		const salt = await genSalt();
 		const createduser = new this.userModel({ ...authCredentialsDto, salt });
 		createduser.password = await hash(createduser.password, salt);
-		return createduser.save();
+		try {
+			const { username } = await createduser.save();
+			const payload: JwtPayload = { username };
+			const accessToken = this.jwtService.sign(payload);
+			return Promise.resolve({ accessToken });
+		} catch (error) {
+			return Promise.reject({...error, name: 'MongoError'});
+		}
 	}
 	async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string | { accessToken: string }> {
 		const isPasswordValid = await this.validateUserPassword(authCredentialsDto.username, authCredentialsDto.password);
 		if (isPasswordValid) {
-			const payload: JwtPayload = { username: authCredentialsDto.username};
+			const payload: JwtPayload = { username: authCredentialsDto.username };
 			const accessToken = this.jwtService.sign(payload);
-			return Promise.resolve({accessToken});
+			return Promise.resolve({ accessToken });
 		} else {
 			return Promise.reject('Invalid credentials');
 		}

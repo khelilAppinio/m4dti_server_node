@@ -22,7 +22,7 @@ export class AuthController {
 			});
 	}
 
-	@Post('signin')
+	@Post('login')
 	@UseFilters(UnauthorizedFilter, MongoExceptionFilter)
 	signIn(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<any> {
 		return this.authService.signIn(authCredentialsDto)
@@ -35,10 +35,10 @@ export class AuthController {
 			});
 	}
 
-	@Get('test')
+	@Get('isLoggedIn')
 	@UseGuards(AuthGuard())
 	testAuth(@GetUser() user: User) {
-		console.log(user);
+		return (user) ? true : false;
 	}
 
 }

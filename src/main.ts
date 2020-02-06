@@ -10,7 +10,7 @@ async function bootstrap() {
 		cert: fs.readFileSync(join(__dirname, '..', 'cert/server.cert')),
 	};
 	// ! TODO: cors need to be removed
-	const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, httpsOptions });
+	const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
 	app.useStaticAssets(join(__dirname, '..', 'public/uploaded_images'), { prefix: '/public/uploaded_images' });
 	app.useStaticAssets(join(__dirname, '..', 'public/uploaded_audios'), { prefix: '/public/uploaded_audios' });
 

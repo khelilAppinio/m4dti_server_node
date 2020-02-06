@@ -1,4 +1,4 @@
-import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewayDisconnect } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { ConnectedClientsHistoryService } from '../services/connected-clients-history/connected-clients-history.service';
@@ -8,6 +8,7 @@ import { DataFromMainClient } from '../types/emittable';
 @WebSocketGateway(4444) // WebSocket port number: 4444
 export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can implemet also OnGatewayConnection
 
+	@WebSocketServer() private server: Server;
 	private logger: Logger = new Logger('ChatGetway');
 	private mainClient: Socket;
 	private mainClientConnected = false;

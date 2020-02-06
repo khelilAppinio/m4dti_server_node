@@ -31,7 +31,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				if (fclient.client.id === client.id) {
 					this.logger.log('[handleDisconnect] client disconnected: ' + fclient.username);
 					this.connectedClientsHistoryService.update(fclient.username, false, undefined)
-						.then(res => { })
 						.catch(err => this.logger.warn('err'));
 					return false;
 				}
@@ -59,7 +58,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			this.server.sockets.in('mainClientsRoom').emit('messageFromMainClientToClient', {
 				targetSocketID: data.userSourceSocketId,
 				body: data.body,
-				date
+				date,
 			});
 			// persist message in the db
 			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date, mediaUrl: undefined, unread: true });
@@ -97,7 +96,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		});
 		// ! TODO: handle error
 		this.connectedClientsHistoryService.update(username, true, client.id)
-			.then(res => { })
 			.catch(err => this.logger.warn('err'));
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected

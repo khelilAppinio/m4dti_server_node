@@ -13,6 +13,7 @@ async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, httpsOptions });
 	app.useStaticAssets(join(__dirname, '..', 'public/uploaded_images'), { prefix: '/public/uploaded_images' });
 	app.useStaticAssets(join(__dirname, '..', 'public/uploaded_audios'), { prefix: '/public/uploaded_audios' });
+	app.useStaticAssets(join(__dirname, '..', '.well-known/acme-challenge'), { prefix: '/.well-known/acme-challenge' });
 
 	// ! TODO: limit need to be removed
 	app.use(bodyParser.json({ limit: '50mb' }));

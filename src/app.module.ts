@@ -10,7 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
 	imports: [
-		MongooseModule.forRoot('mongodb://mongo:27017/nestFirst'),
+		MongooseModule.forRoot(`mongodb://${process.env.MONGO_TARGET || 'localhost'}/nestFirst`),
 		ConnectedClientsHistoryModule,
 		MessageModule,
 		AuthModule,

@@ -36,7 +36,7 @@ export class AuthController {
 	}
 
 	@Get('isLoggedIn')
-	@UseGuards()
+	@UseGuards(AuthGuard())
 	testAuth(@GetUser() user: User) {
 		return (user) ? true : false;
 	}

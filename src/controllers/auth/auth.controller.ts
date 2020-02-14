@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Logger, UseFilters, BadRequestException, ValidationPipe, UnauthorizedException, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseFilters, ValidationPipe, UnauthorizedException, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuthCredentialsDto } from '../../dtos/auth-credentials.dto';
 import { MongoExceptionFilter } from '../../exception-filters/mongo.ef';
@@ -41,4 +41,43 @@ export class AuthController {
 		return (user) ? true : false;
 	}
 
+	@Get('google')
+	@UseGuards(AuthGuard('google'))
+	googleLogin() {
+		// initiates the Google OAuth2 login flow
+	}
+
+	@Get('google/callback')
+	@UseGuards(AuthGuard('google'))
+	googleLoginCallback(@Req() req, @Res() res) {
+		// handles the Google OAuth2 callback
+		const jwt: string = req.user.jwt;
+		if (jwt) {
+			res.redirect('http://localhost:4200/login/succes/' + jwt);
+			//return {accessToken: jwt};
+		} else {
+			res.redirect('http://localhost:4200/login/failure');
+			//return new UnauthorizedException();
+		}
+	}
+
+	@Get('facebook')
+	@UseGuards(AuthGuard('facebook'))
+	facebookLogin() {
+		// initiates the Google OAuth2 login flow
+	}
+
+	@Get('facebook/callback')
+	@UseGuards(AuthGuard('facebook'))
+	facebookLoginCallback(@Req() req, @Res() res) {
+		// handles the Google OAuth2 callback
+		const jwt: string = req.user.jwt;
+		if (jwt) {
+			res.redirect('http://localhost:4200/login/succes/' + jwt);
+			//return {accessToken: jwt};
+		} else {
+			res.redirect('http://localhost:4200/login/failure');
+			//return new UnauthorizedException();
+		}
+	}
 }

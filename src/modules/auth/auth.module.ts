@@ -11,8 +11,6 @@ import { GoogleStrategy } from '../../strategies/google.strategy';
 @Module({
 	imports: [
 		MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-		GoogleStrategy,
-		FacebookStrategy,
 		PassportModule.register({ defaultStrategy: 'jwt' }),
 		JwtModule.register({
 			secret: 'm4dtiSecretKey',
@@ -22,7 +20,7 @@ import { GoogleStrategy } from '../../strategies/google.strategy';
 		}),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, JwtStrategy],
+	providers: [AuthService, JwtStrategy, GoogleStrategy, FacebookStrategy],
 	exports: [JwtStrategy, JwtModule],
 })
 export class AuthModule { }

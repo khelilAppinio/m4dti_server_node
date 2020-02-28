@@ -18,6 +18,7 @@ async function bootstrap() {
 	// ! TODO: limit need to be removed
 	app.use(bodyParser.json({ limit: '50mb' }));
 	app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+	app.setGlobalPrefix('api/v2');
 	await app.listen(443);
 }
 bootstrap();

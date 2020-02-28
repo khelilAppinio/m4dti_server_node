@@ -1,7 +1,7 @@
 import { Controller, Post, Headers, HttpService, HttpException, HttpStatus } from '@nestjs/common';
 
 @Controller('signup')
-export class AuthController {
+export class ClientAuthController {
 	constructor(private readonly httpService: HttpService) { }
 	@Post()
 	async signup(@Headers() headers) {
@@ -22,7 +22,7 @@ export class AuthController {
 									// tslint:disable-next-line: variable-name
 									const profile_picture = response.data.pictureUrl;
 									return {
-										id: 3,
+										id: 30,
 										role: 'user',
 										provider,
 										provider_user_id,

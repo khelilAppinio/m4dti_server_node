@@ -23,4 +23,4 @@ import { GoogleStrategy } from '../../strategies/google.strategy';
 	providers: [AuthService, JwtStrategy, GoogleStrategy, FacebookStrategy],
 	exports: [JwtStrategy, JwtModule],
 })
-export class AuthModule { }
+export class AdminAuthModule { }

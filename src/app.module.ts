@@ -9,6 +9,7 @@ import { AudioUploadController } from './controllers/audio-upload/audio-upload.c
 import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
 import { ClientAuthModule } from './modules/client-auth/client-auth.module';
 import { ReportModule } from './modules/report/report.module';
+import { EventModule } from './modules/event/event.module';
 
 @Module({
 	imports: [
@@ -17,7 +18,8 @@ import { ReportModule } from './modules/report/report.module';
 		MessageModule,
 		AdminAuthModule,
 		ClientAuthModule,
-		ReportModule
+		ReportModule,
+		EventModule
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
 	providers: [ChatGateway],

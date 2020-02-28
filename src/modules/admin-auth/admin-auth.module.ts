@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AdminAuthController } from '../../controllers/admin-auth/admin-auth.controller';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from '../../services/admin-auth/admin-auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from '../../schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';

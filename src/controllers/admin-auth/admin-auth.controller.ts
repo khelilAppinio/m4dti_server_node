@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, UseFilters, ValidationPipe, UnauthorizedException, UseGuards, Req, Res } from '@nestjs/common';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from '../../services/admin-auth/admin-auth.service';
 import { AuthCredentialsDto } from '../../dtos/auth-credentials.dto';
 import { MongoExceptionFilter } from '../../exception-filters/mongo.ef';
 import { MongoError } from 'mongodb';

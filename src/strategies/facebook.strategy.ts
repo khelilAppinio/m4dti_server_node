@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-facebook'
-import { AuthService, Provider } from '../services/auth/auth.service';
+import { AuthService, Provider } from '../services/admin-auth/admin-auth.service';
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 

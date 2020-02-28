@@ -8,8 +8,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { User } from '../../models/users.model';
 
-@Controller('auth')
-export class AuthController {
+@Controller('admin/auth')
+export class AdminAuthController {
 	constructor(private readonly authService: AuthService) { }
 	@Post('signup')
 	@UseFilters(MongoExceptionFilter)

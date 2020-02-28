@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from '../../controllers/auth/auth.controller';
+import { AdminAuthController } from '../../controllers/admin-auth/admin-auth.controller';
 import { AuthService } from '../../services/auth/auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from '../../schemas/user.schema';
@@ -19,7 +19,7 @@ import { GoogleStrategy } from '../../strategies/google.strategy';
 			},
 		}),
 	],
-	controllers: [AuthController],
+	controllers: [AdminAuthController],
 	providers: [AuthService, JwtStrategy, GoogleStrategy, FacebookStrategy],
 	exports: [JwtStrategy, JwtModule],
 })

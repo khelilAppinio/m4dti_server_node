@@ -8,6 +8,7 @@ import { ConnectedClientsHistoryController } from './controllers/connected-clien
 import { AudioUploadController } from './controllers/audio-upload/audio-upload.controller';
 import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
 import { ClientAuthModule } from './modules/client-auth/client-auth.module';
+import { ReportModule } from './modules/report/report.module';
 
 @Module({
 	imports: [
@@ -15,7 +16,8 @@ import { ClientAuthModule } from './modules/client-auth/client-auth.module';
 		ConnectedClientsHistoryModule,
 		MessageModule,
 		AdminAuthModule,
-		ClientAuthModule
+		ClientAuthModule,
+		ReportModule
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
 	providers: [ChatGateway],

@@ -3,16 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Report } from '../../models/report.model';
 import { User } from '../../models/users.model';
-import { CreateReportDto } from 'src/dtos/create-report.dto';
+import { CreateReportDto } from '../../dtos/create-report.dto';
+import { UpdatePositionDto } from '../../dtos/update-position.dto';
 
 @Injectable()
 export class ReportService {
-	
-	
+
 	constructor(
 		@InjectModel('Report') private readonly reportModel: Model<Report>,
 		@InjectModel('User') private readonly userModel: Model<User>,
-	) {}
+	) { }
 	async getAllReportsByUser(providerUserId): Promise<Report[]> {
 		return [];
 	}
@@ -40,6 +40,12 @@ export class ReportService {
 		}
 	}
 	async closeReport(user: User) {
-		return await this.reportModel.updateOne({user_id: user.provider_user_id}, {current_status: 'closed'});
+		return await this.reportModel.updateOne({ user_id: user.provider_user_id }, { current_status: 'closed' });
+	}
+
+	async updatePosition(user: User, updatePositionDto: UpdatePositionDto) {
+		return await this.reportModel.findOneAndUpdate({
+			user_id: user.provider_user_id
+		}, { latitude: updatePositionDto.latitude, longitude: updatePositionDto.longitude });
 	}
 }

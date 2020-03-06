@@ -3,6 +3,7 @@ import { ReportService } from '../../services/report/report.service';
 import { GetUser } from '../../decorators/get-user.decorator';
 import { User } from '../../models/users.model';
 import { CreateReportDto } from '../../dtos/create-report.dto';
+import { UpdatePositionDto } from '../../dtos/update-position.dto';
 
 @Controller('me/reports')
 export class ReportController {
@@ -29,8 +30,20 @@ export class ReportController {
 		return [];
 	}
 	@Patch('position')
-	updatePosition() {
-
+	async updatePosition(@GetUser() user: User,@Body(ValidationPipe) updatePositionDto: UpdatePositionDto) {
+		console.log('update');
+		
+		try {
+			const update = await this.reportService.updatePosition(user, updatePositionDto);
+			console.log(update);
+			
+			return update;
+		} catch (error) {
+			console.log(error);
+			
+			throw new HttpException('position could not be updated', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 	}
 	@Patch('close')
 	async closeReport(@GetUser() user: User) {

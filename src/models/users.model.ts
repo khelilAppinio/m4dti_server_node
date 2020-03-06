@@ -1,7 +1,11 @@
 export interface User {
-	username: string;
-	password: string;
-	salt: string;
-	avatar: string;
-	status: 'offline' | 'online';
+	name: string;
+	password?: string;
+	salt?: string;
+	status?: 'offline' | 'online';
+
+	role: string;
+	provider: string;
+	provider_user_id: string;
+	profile_picture: string;
 }

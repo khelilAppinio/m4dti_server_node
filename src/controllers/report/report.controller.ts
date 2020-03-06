@@ -1,18 +1,20 @@
-import { Controller, Post, Get, Patch, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, HttpException, HttpStatus, Body, ValidationPipe, Param } from '@nestjs/common';
 import { ReportService } from '../../services/report/report.service';
 import { GetUser } from '../../decorators/get-user.decorator';
-import { User } from 'src/models/users.model';
+import { User } from '../../models/users.model';
+import { CreateReportDto } from '../../dtos/create-report.dto';
 
 @Controller('me/reports')
 export class ReportController {
-	constructor(private readonly reportService: ReportService) {}
+	constructor(private readonly reportService: ReportService) { }
 	@Post()
-	setReport() {
-
+	async setReport(@GetUser() user: User, @Body(ValidationPipe) createReportDto: CreateReportDto) {
+		const newReport = await this.reportService.createReport(user.provider_user_id, createReportDto);
+		return newReport;
 	}
 	@Post(':id/events')
 	setEventByReportId() {
-
+		return [];
 	}
 	@Get()
 	getAllReportsByUser(@GetUser() user: User) {
@@ -24,14 +26,20 @@ export class ReportController {
 	}
 	@Get(':id/events')
 	getAllEventsByReportId() {
-
+		return [];
 	}
 	@Patch('position')
 	updatePosition() {
 
 	}
-	@Patch(':id/close')
-	closeReport() {
-
+	@Patch('close')
+	async closeReport(@GetUser() user: User) {
+		
+		const updated = await this.reportService.closeReport(user);
+		if (updated) {
+			return {status: 'closed'};
+		} else {
+			throw new HttpException('report could not be updated', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

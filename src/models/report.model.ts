@@ -1,4 +1,5 @@
 import { ChatRoom } from "./chatroom.model";
+import { Events } from "./events.model";
 
 export enum ReportStatus {
 	OPEN = 'open',
@@ -12,7 +13,7 @@ export interface Report {
 	latitude: number;
 	time: string;
 	current_status: ReportStatus;
-	events: {id: number}[];
+	events: Events[];
 	chatroom: {
 		id: number,
 		report_id: number,

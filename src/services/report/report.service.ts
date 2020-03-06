@@ -5,6 +5,7 @@ import { Report } from '../../models/report.model';
 import { User } from '../../models/users.model';
 import { CreateReportDto } from '../../dtos/create-report.dto';
 import { UpdatePositionDto } from '../../dtos/update-position.dto';
+import { CreateEventDto } from '../../dtos/create-event.dto';
 
 @Injectable()
 export class ReportService {
@@ -47,5 +48,36 @@ export class ReportService {
 		return await this.reportModel.findOneAndUpdate({
 			user_id: user.provider_user_id
 		}, { latitude: updatePositionDto.latitude, longitude: updatePositionDto.longitude });
+	}
+
+	async createEvent(id: number, createEventDto: CreateEventDto) {
+		const properties = createEventDto.properties_attributes.map(prop => {
+			//! TODO: property_type must be removed
+			if (prop.name === 'media') {
+				return {
+					id: Math.floor(Math.random() * Math.floor(999999999)),
+					...prop,
+					value: prop.documents_attributes,
+				}
+			} else {
+				return {
+					id: Math.floor(Math.random() * Math.floor(999999999)),
+					...prop
+				}
+			}
+		})
+		const event = {
+			id: Math.floor(Math.random() * Math.floor(999999999)),
+			event_type: createEventDto.event_type,
+			time: createEventDto.time,
+			properties
+		};
+		const previouseReportEvents = await this.reportModel.findOne({ id });
+		const events = [...previouseReportEvents.events];
+		events.push(event);
+		await this.reportModel.findOneAndUpdate({
+			id
+		}, { events });
+		return event;
 	}
 }

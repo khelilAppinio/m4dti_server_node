@@ -4,6 +4,7 @@ import { GetUser } from '../../decorators/get-user.decorator';
 import { User } from '../../models/users.model';
 import { CreateReportDto } from '../../dtos/create-report.dto';
 import { UpdatePositionDto } from '../../dtos/update-position.dto';
+import { CreateEventDto } from '../../dtos/create-event.dto';
 
 @Controller('me/reports')
 export class ReportController {
@@ -14,8 +15,17 @@ export class ReportController {
 		return newReport;
 	}
 	@Post(':id/events')
-	setEventByReportId() {
-		return [];
+	async setEventByReportId(@Param('id') id: number, @Body(ValidationPipe) createEventDto: CreateEventDto) {
+		try {
+			const report = await this.reportService.createEvent(id, createEventDto);
+			console.log(report);
+			return report;
+		} catch (error) {
+			console.log(error);
+			
+			throw new HttpException('could not create new event', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 	}
 	@Get()
 	getAllReportsByUser(@GetUser() user: User) {
@@ -30,27 +40,27 @@ export class ReportController {
 		return [];
 	}
 	@Patch('position')
-	async updatePosition(@GetUser() user: User,@Body(ValidationPipe) updatePositionDto: UpdatePositionDto) {
+	async updatePosition(@GetUser() user: User, @Body(ValidationPipe) updatePositionDto: UpdatePositionDto) {
 		console.log('update');
-		
+
 		try {
 			const update = await this.reportService.updatePosition(user, updatePositionDto);
 			console.log(update);
-			
+
 			return update;
 		} catch (error) {
 			console.log(error);
-			
+
 			throw new HttpException('position could not be updated', HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 	}
 	@Patch('close')
 	async closeReport(@GetUser() user: User) {
-		
+
 		const updated = await this.reportService.closeReport(user);
 		if (updated) {
-			return {status: 'closed'};
+			return { status: 'closed' };
 		} else {
 			throw new HttpException('report could not be updated', HttpStatus.INTERNAL_SERVER_ERROR);
 		}

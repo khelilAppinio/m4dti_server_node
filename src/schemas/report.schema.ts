@@ -7,7 +7,7 @@ export const ReportSchema = new mongoose.Schema({
 	latitude: Number,
 	time: String,
 	current_status: String,
-	events: [{ id: Number }],
+	events: [Object],
 	chatroom: {
 		id: Number,
 		report_id: Number,

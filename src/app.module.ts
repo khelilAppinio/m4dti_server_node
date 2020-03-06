@@ -10,6 +10,7 @@ import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
 import { ClientAuthModule } from './modules/client-auth/client-auth.module';
 import { ReportModule } from './modules/report/report.module';
 import { EventModule } from './modules/event/event.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
 	imports: [
@@ -19,7 +20,8 @@ import { EventModule } from './modules/event/event.module';
 		AdminAuthModule,
 		ClientAuthModule,
 		ReportModule,
-		EventModule
+		EventModule,
+		UserModule
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
 	providers: [ChatGateway],

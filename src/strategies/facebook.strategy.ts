@@ -19,7 +19,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
     async validate(request: any, accessToken: string, refreshToken: string, profile, done: Function) {
         try {
-            // console.log(profile);
             const jwt: string = await this.authService.validateOAuthLogin(profile.id, Provider.GOOGLE);
             const user =
             {
@@ -28,7 +27,6 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
 
             done(null, user);
         } catch (err) {
-            // console.log(err)
             done(err, false);
         }
     }

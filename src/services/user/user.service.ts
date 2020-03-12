@@ -9,14 +9,12 @@ export class UserService {
     public async saveProvidedUser(user: User): Promise<User> {
         try {
             const _user = await this.userModel.findOne({name: user.name});
-            console.log('found user', _user);
             if (_user) {
                 return _user;
             } else {
                 const newUser = new this.userModel({...user});
                 try {
                     await newUser.save();
-                    console.log('new user', user);
                     return user;
                 } catch (error) {
                     throw new HttpException('could not reach the database', HttpStatus.INTERNAL_SERVER_ERROR);

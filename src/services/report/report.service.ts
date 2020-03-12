@@ -6,6 +6,7 @@ import { User } from '../../models/users.model';
 import { CreateReportDto } from '../../dtos/create-report.dto';
 import { UpdatePositionDto } from '../../dtos/update-position.dto';
 import { CreateEventDto } from '../../dtos/create-event.dto';
+import { UpdateEventDto } from '../../dtos/update-event.dto';
 
 @Injectable()
 export class ReportService {
@@ -15,9 +16,21 @@ export class ReportService {
 		@InjectModel('User') private readonly userModel: Model<User>,
 	) { }
 	async getAllReportsByUser(providerUserId): Promise<Report[]> {
-		return [];
+		try {
+			const reports = await this.reportModel.find({ user_id: providerUserId });
+			return reports;
+		} catch (error) {
+			throw new HttpException('could not reach the database', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
-
+	async getAllEventsByReportId(reportId: number, userId: string) {
+		try {
+			const report = await this.reportModel.findOne({ id: reportId, user_id: userId });
+			return report.events;
+		} catch (error) {
+			throw new HttpException('could not reach the database', HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	async createReport(providerId: string, createReportDto: CreateReportDto): Promise<Report> {
 		const newReport = new this.reportModel({
 			id: Math.floor(Math.random() * Math.floor(999999999)),
@@ -79,5 +92,61 @@ export class ReportService {
 			id
 		}, { events });
 		return event;
+	}
+
+	async deleteEventByUseId(provider_user_id: string, eventId: string) {
+		try {
+
+			let report = await this.reportModel.findOne({ user_id: provider_user_id, current_status: 'open' });
+			const events = [...report.events].filter(event => parseInt(eventId) !== event.id);
+			return await this.reportModel.findOneAndUpdate({ user_id: provider_user_id, current_status: 'open' }, { events });
+		} catch (error) {
+			throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	async updateEventById(userId: string, eventId: string, updateEventDto: UpdateEventDto) {
+		try {
+			let report = await this.reportModel.findOne({ user_id: userId, current_status: 'open' });
+			let events = [...report.events];
+			let updatedEvent: any;
+			events =
+				await this.reportModel.update(
+					{ user_id: userId, current_status: 'open' },
+					{
+						events: events.map(event => {
+							if (event.id === parseInt(eventId)) {
+								event.properties = updateEventDto.properties_attributes;
+								event.properties = [...event.properties].map(prop => {
+									if (prop.name === 'media') {
+										return {
+											...prop,
+											value: prop.documents_attributes
+										};
+									}
+									return prop;
+								});
+								updatedEvent = event;
+							}
+							return event;
+						})
+					}
+				);
+			if (updatedEvent) {
+				return updatedEvent;
+			} else {
+				throw new HttpException('could not find event', HttpStatus.BAD_REQUEST);
+			}
+		} catch (error) {
+			throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	async deleteAllReportsByUserId(userId: string) {
+		try {
+			await this.reportModel.remove({user_id: userId});
+		} catch (error) {
+			throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

@@ -7,13 +7,19 @@ import { CreateReportDto } from '../../dtos/create-report.dto';
 import { UpdatePositionDto } from '../../dtos/update-position.dto';
 import { CreateEventDto } from '../../dtos/create-event.dto';
 import { UpdateEventDto } from '../../dtos/update-event.dto';
+import { ImageUploadService } from '../image-upload/image-upload.service';
+
+export const MAX_ID_RANGE = 999999999;
+export function generateId(): number {
+	return Math.floor(Math.random() * Math.floor(MAX_ID_RANGE));
+}
 
 @Injectable()
 export class ReportService {
 
 	constructor(
 		@InjectModel('Report') private readonly reportModel: Model<Report>,
-		@InjectModel('User') private readonly userModel: Model<User>,
+		private readonly imageUploadService: ImageUploadService
 	) { }
 	async getAllReportsByUser(providerUserId): Promise<Report[]> {
 		try {
@@ -33,7 +39,7 @@ export class ReportService {
 	}
 	async createReport(providerId: string, createReportDto: CreateReportDto): Promise<Report> {
 		const newReport = new this.reportModel({
-			id: Math.floor(Math.random() * Math.floor(999999999)),
+			id: generateId(),
 			user_id: providerId,
 			current_status: 'open',
 			events: [],
@@ -64,23 +70,32 @@ export class ReportService {
 	}
 
 	async createEvent(id: number, createEventDto: CreateEventDto) {
-		const properties = createEventDto.properties_attributes.map(prop => {
+		const properties = await Promise.all(createEventDto.properties_attributes.map(async (prop) => {
 			//! TODO: property_type must be removed
 			if (prop.name === 'media') {
+				prop.documents_attributes = await Promise.all(prop.documents_attributes.map(async (attr: { data: string }) => {
+					try {
+						attr.data = await this.imageUploadService.saveImage(attr.data);
+						return attr;
+					} catch (error) {
+						throw error;
+					}
+				}));
 				return {
-					id: Math.floor(Math.random() * Math.floor(999999999)),
+					id: generateId(),
 					...prop,
 					value: prop.documents_attributes,
 				}
 			} else {
 				return {
-					id: Math.floor(Math.random() * Math.floor(999999999)),
+					id: generateId(),
 					...prop
 				}
 			}
-		})
+		}));
+
 		const event = {
-			id: Math.floor(Math.random() * Math.floor(999999999)),
+			id: generateId(),
 			event_type: createEventDto.event_type,
 			time: createEventDto.time,
 			properties
@@ -112,24 +127,35 @@ export class ReportService {
 			let updatedEvent: any;
 			events =
 				await this.reportModel.update(
-					{ user_id: userId, current_status: 'open' },
 					{
-						events: events.map(event => {
+						user_id: userId,
+						current_status: 'open'
+					},
+					{
+						events: await Promise.all(events.map(async event => {
 							if (event.id === parseInt(eventId)) {
 								event.properties = updateEventDto.properties_attributes;
-								event.properties = [...event.properties].map(prop => {
+								event.properties = await Promise.all([...event.properties].map(async prop => {
 									if (prop.name === 'media') {
+										prop.documents_attributes = await Promise.all(prop.documents_attributes.map(async (attr: { data: string }) => {
+											try {
+												attr.data = await this.imageUploadService.saveImage(attr.data);
+												return attr;
+											} catch (error) {
+												throw error;
+											}
+										}));
 										return {
 											...prop,
 											value: prop.documents_attributes
 										};
 									}
 									return prop;
-								});
+								}));
 								updatedEvent = event;
 							}
 							return event;
-						})
+						}))
 					}
 				);
 			if (updatedEvent) {
@@ -144,7 +170,7 @@ export class ReportService {
 
 	async deleteAllReportsByUserId(userId: string) {
 		try {
-			await this.reportModel.remove({user_id: userId});
+			await this.reportModel.remove({ user_id: userId });
 		} catch (error) {
 			throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
 		}

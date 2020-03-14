@@ -4,6 +4,7 @@ import { ReportService } from '../../services/report/report.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReportSchema } from '../../schemas/report.schema';
 import { UserSchema } from '../../schemas/user.schema';
+import { ImageUploadService } from 'src/services/image-upload/image-upload.service';
 
 @Module({
 	imports: [
@@ -11,6 +12,6 @@ import { UserSchema } from '../../schemas/user.schema';
 		MongooseModule.forFeature([{ name: 'User', schema: UserSchema }])
 	],
 	controllers: [ReportController],
-	providers: [ReportService]
+	providers: [ReportService, ImageUploadService]
 })
 export class ReportModule { }

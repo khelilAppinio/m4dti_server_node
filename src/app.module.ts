@@ -10,6 +10,7 @@ import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
 import { ClientAuthModule } from './modules/client-auth/client-auth.module';
 import { ReportModule } from './modules/report/report.module';
 import { UserModule } from './modules/user/user.module';
+import { ImageUploadService } from './services/image-upload/image-upload.service';
 
 @Module({
 	imports: [
@@ -22,6 +23,6 @@ import { UserModule } from './modules/user/user.module';
 		UserModule
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],
-	providers: [ChatGateway],
+	providers: [ChatGateway, ImageUploadService],
 })
 export class AppModule { }

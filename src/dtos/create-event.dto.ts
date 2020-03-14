@@ -10,6 +10,6 @@ export class CreateEventDto {
         name: string,
         property_type: string,
         value?: string | boolean,
-        documents_attributes?: string[]
+        documents_attributes?: {data: string}[]
     }[];
 }

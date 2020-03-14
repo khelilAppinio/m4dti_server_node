@@ -9,7 +9,6 @@ import { AudioUploadController } from './controllers/audio-upload/audio-upload.c
 import { AdminAuthModule } from './modules/admin-auth/admin-auth.module';
 import { ClientAuthModule } from './modules/client-auth/client-auth.module';
 import { ReportModule } from './modules/report/report.module';
-import { EventModule } from './modules/event/event.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -20,7 +19,6 @@ import { UserModule } from './modules/user/user.module';
 		AdminAuthModule,
 		ClientAuthModule,
 		ReportModule,
-		EventModule,
 		UserModule
 	],
 	controllers: [ImageUploadController, ConnectedClientsHistoryController, AudioUploadController],

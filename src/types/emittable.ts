@@ -1,6 +1,6 @@
 export interface DataFromMainClient {
 	userSourceSocketId: string;
 	userId: string;
-	username: string;
+	name: string;
 	body: string;
 }

@@ -17,7 +17,7 @@ export class AudioUploadController {
 		@Body('data') data: string,
 		// * get sourceSocketId from client
 		@Body('sourceSocketId') sourceSocketId: string,
-		@Body('username') username: string,
+		@Body('name') name: string,
 		@Res() res: Response,
 	) {
 		// ! TODO: use regex to filter 3gpp| ..
@@ -40,7 +40,7 @@ export class AudioUploadController {
 					// send recieved media from a client to the main client
 					const mediaUrl = `${ENV.API_URL}:${ENV.API_PORT}/public/uploaded_audios/${audioId}.${audioExtension}`;
 					// * send media url to the destination
-					this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
+					this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, name);
 					return res.status(HttpStatus.OK).send({ mediaUrl });
 				},
 			);

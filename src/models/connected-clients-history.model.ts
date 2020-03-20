@@ -1,5 +1,5 @@
 export interface ConnectedClientsHistory {
-	username: string;
+	name: string;
 	isConnected: boolean;
 	socketID: string;
 }

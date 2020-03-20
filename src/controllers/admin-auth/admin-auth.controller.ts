@@ -13,8 +13,8 @@ export class AdminAuthController {
 	constructor(private readonly authService: AuthService) { }
 	@Post('signup')
 	@UseFilters(MongoExceptionFilter)
-	signUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<any> {
-		return this.authService.signUp(authCredentialsDto)
+	async signUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<any> {
+		return await this.authService.signUp(authCredentialsDto)
 			.catch(error => {
 				if (error.name === 'MongoError') {
 					throw new MongoError({ error });
@@ -37,8 +37,8 @@ export class AdminAuthController {
 
 	@Get('isLoggedIn')
 	@UseGuards(AuthGuard())
-	testAuth(@GetUser() user: User) {
-		return (user) ? true : false;
+	testAuth() {
+		return true;
 	}
 
 	@Get('google')

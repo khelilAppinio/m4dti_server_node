@@ -24,26 +24,26 @@ export class AuthService {
 		const createduser = new this.userModel({ ...authCredentialsDto, salt });
 		createduser.password = await hash(createduser.password, salt);
 		try {
-			const { username } = await createduser.save();
-			const payload: JwtPayload = { username };
+			const { name } = await createduser.save();
+			const payload: JwtPayload = { name };
 			const accessToken = this.jwtService.sign(payload);
-			return Promise.resolve({ accessToken });
+			return { accessToken };
 		} catch (error) {
-			return Promise.reject({...error, name: 'MongoError'});
+			throw {...error, name: 'MongoError'}
 		}
 	}
 	async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string | { accessToken: string }> {
-		const isPasswordValid = await this.validateUserPassword(authCredentialsDto.username, authCredentialsDto.password);
+		const isPasswordValid = await this.validateUserPassword(authCredentialsDto.name, authCredentialsDto.password);
 		if (isPasswordValid) {
-			const payload: JwtPayload = { username: authCredentialsDto.username };
+			const payload: JwtPayload = { name: authCredentialsDto.name };
 			const accessToken = this.jwtService.sign(payload);
 			return Promise.resolve({ accessToken });
 		} else {
 			return Promise.reject('Invalid credentials');
 		}
 	}
-	private async validateUserPassword(username: string, password: string): Promise<boolean> {
-		const user = await this.userModel.findOne({ username });
+	private async validateUserPassword(name: string, password: string): Promise<boolean> {
+		const user = await this.userModel.findOne({ name });
 		return (user && await hash(password, user.salt) === user.password);
 	}
 	public async validateOAuthLogin(thirdPartyId: string, provider: Provider): Promise<string> {

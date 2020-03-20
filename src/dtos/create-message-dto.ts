@@ -7,7 +7,7 @@ export class CreateMessageDto {
 	@IsNumber()
 	readonly date: number; // TODO: change to switable type.
 	@IsString()
-	readonly username: string; // TODO change to uniqueId
+	readonly name: string; // TODO change to uniqueId
 	@IsString()
 	readonly mediaUrl: string;
 	@IsBoolean()

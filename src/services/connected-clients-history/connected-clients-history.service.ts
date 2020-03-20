@@ -6,13 +6,13 @@ import { ConnectedClientsHistory } from '../../models/connected-clients-history.
 export class ConnectedClientsHistoryService {
 
 	constructor(@InjectModel('ConnectedClientsHistory') private readonly connectedClientsHistoryModel: Model<ConnectedClientsHistory>) { }
-	public async update(username: string, isConnected: boolean, socketID: string): Promise<ConnectedClientsHistory> {// ! TODO: need a DTO here
-		const foundUsername = await this.findById(username);
-		if (foundUsername) {
-			return await this.connectedClientsHistoryModel.updateOne({ username }, { isConnected, socketID }).exec();
+	public async update(name: string, isConnected: boolean, socketID: string): Promise<ConnectedClientsHistory> {// ! TODO: need a DTO here
+		const foundname = await this.findById(name);
+		if (foundname) {
+			return await this.connectedClientsHistoryModel.updateOne({ name }, { isConnected, socketID }).exec();
 		} else {
 			const connectedClientsHistory = new this.connectedClientsHistoryModel({
-				username,
+				name,
 				isConnected,
 				socketID,
 			});
@@ -20,8 +20,8 @@ export class ConnectedClientsHistoryService {
 		}
 	}
 
-	private async findById(username: string): Promise<ConnectedClientsHistory> { // ! TODO: need to be ID not Username
-		return this.connectedClientsHistoryModel.findOne({ username }).exec();
+	private async findById(name: string): Promise<ConnectedClientsHistory> { // ! TODO: need to be ID not name
+		return this.connectedClientsHistoryModel.findOne({ name }).exec();
 	}
 
 	public async 	findAllConnectedClientsHistory(isConnected?: boolean) {

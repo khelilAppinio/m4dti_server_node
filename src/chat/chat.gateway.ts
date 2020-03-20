@@ -1,4 +1,4 @@
-import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewayDisconnect, WebSocketServer } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, OnGatewayInit, WsResponse, OnGatewayDisconnect, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { ConnectedClientsHistoryService } from '../services/connected-clients-history/connected-clients-history.service';
@@ -6,13 +6,14 @@ import { MessageService } from '../services/message/message.service';
 import { DataFromMainClient } from '../types/emittable';
 
 @WebSocketGateway(4444) // WebSocket port number: 4444
-export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can implemet also OnGatewayConnection
+export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect, OnGatewayConnection{
+	 // can implemet also OnGatewayConnection
 
 	@WebSocketServer() private server: Server;
 	private logger: Logger = new Logger('ChatGetway');
 	private mainClientsIDs: string[] = [];
 	private mainClientConnected = false;
-	private clientsList: Array<{ client: Socket, username: string }> = [];
+	private clientsList: Array<{ client: Socket, name: string }> = [];
 
 	constructor(
 		private readonly connectedClientsHistoryService: ConnectedClientsHistoryService,
@@ -29,8 +30,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		} else {
 			this.clientsList = this.clientsList.filter(fclient => {
 				if (fclient.client.id === client.id) {
-					this.logger.log('[handleDisconnect] client disconnected: ' + fclient.username);
-					this.connectedClientsHistoryService.update(fclient.username, false, undefined)
+					this.logger.log('[handleDisconnect] client disconnected: ' + fclient.name);
+					this.connectedClientsHistoryService.update(fclient.name, false, undefined)
 						.catch(err => this.logger.warn('err'));
 					return false;
 				}
@@ -40,14 +41,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			if (this.mainClientConnected) { // if main client is connected
 				this.server.sockets.in('mainClientsRoom').emit('online_clients', {
 					connectedClients: this.clientsList.map(fclient => {
-						return { username: fclient.username, sourceSocketId: fclient.client.id };
+						return { name: fclient.name, sourceSocketId: fclient.client.id };
 					}),
 				});
 			}
 
 		}
 	}
-
+	handleConnection(client: Socket) {
+		console.log(client.id);
+		
+	}
 	@SubscribeMessage('messageFromMainClientToServer')
 	handleMessageFromMainClient(client: Socket, data: DataFromMainClient): WsResponse<string> | void {
 		const target = this.clientsList.find(fclient => fclient.client.id === data.userSourceSocketId);
@@ -61,13 +65,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 				date,
 			});
 			// persist message in the db
-			this.messageService.create({ isAdmin: true, username: data.username, body: data.body, date, mediaUrl: undefined, unread: true });
+			this.messageService.create({ isAdmin: true, name: data.name, body: data.body, date, mediaUrl: undefined, unread: true });
 		}
 		return { event: 'messageFromServerToMainClient', data: 'recieved in server' };
 	}
 
 	@SubscribeMessage('messageFromClientToServer')
-	handleMessageFromClient(client: Socket, data: { text: string, username: string }): WsResponse<string> {
+	handleMessageFromClient(client: Socket, data: { text: string, name: string }): WsResponse<string> {
 		const emitted = false;
 		const date = new Date().getTime();
 		// this.logger.log(this.mainClient.id, 'messageFromClientToServer - main client id');
@@ -83,25 +87,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		this.logger.log(data, 'handleMessageFromClient - emitted');
 
 		// persist message in the db
-		this.messageService.create({ isAdmin: false, username: data.username, body: data.text, date, mediaUrl: undefined, unread: true });
+		this.messageService.create({ isAdmin: false, name: data.name, body: data.text, date, mediaUrl: undefined, unread: true });
 		return { event: 'messageFromServerToClient', data: 'recieved in server' };
 	}
 
 	@SubscribeMessage('messageInitFromClient')
-	handleInitMessageFromClient(client: Socket, username: string): WsResponse<{ mainClientIsConnected: boolean }> {
-		this.logger.log('client connected: ' + username + ' -- id: ' + client.id);
+	handleInitMessageFromClient(client: Socket, name: string): WsResponse<{ mainClientIsConnected: boolean }> {
+		this.logger.log('client connected: ' + name + ' -- id: ' + client.id);
 		this.clientsList.push({
-			username,
+			name,
 			client,
 		});
 		// ! TODO: handle error
-		this.connectedClientsHistoryService.update(username, true, client.id)
+		this.connectedClientsHistoryService.update(name, true, client.id)
 			.catch(err => this.logger.warn('err'));
 		// tell main client that there is a new connected client
 		if (this.mainClientConnected) { // if main client is connected
 			this.server.sockets.in('mainClientsRoom').emit('online_clients', {
 				connectedClients: this.clientsList.map(fclient => {
-					return { username: fclient.username, sourceSocketId: fclient.client.id };
+					return { name: fclient.name, sourceSocketId: fclient.client.id };
 				}),
 			});
 		} // ! TODO: put it in the db for main client as unread
@@ -120,7 +124,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			} else {
 				this.server.sockets.in('mainClientsRoom').emit('online_clients', {
 						connectedClients: this.clientsList.map(fclient => {
-							return { username: fclient.username, sourceSocketId: fclient.client.id };
+							return { name: fclient.name, sourceSocketId: fclient.client.id };
 						}),
 				});
 			}
@@ -129,7 +133,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 		this.mainClientConnected = true;
 	}
 
-	public sendMedia(mediaUrl: string, destination: string, date: number, username: string) {
+	public sendMedia(mediaUrl: string, destination: string, date: number, name: string) {
 		// ! TODO: verify if main client is online otherwise set message as unread and persist
 		if (this.mainClientConnected) {
 			this.server.sockets.in('mainClientsRoom').emit('messageFromClientToMainClient', {
@@ -141,6 +145,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayDisconnect { // can 
 			});
 		} // ? else...
 		// * save in the db as message
-		this.messageService.create({ isAdmin: false, username, body: undefined, date, mediaUrl, unread: true });
+		this.messageService.create({ isAdmin: false, name, body: undefined, date, mediaUrl, unread: true });
 	}
 }

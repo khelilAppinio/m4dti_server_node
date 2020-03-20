@@ -18,15 +18,15 @@ export class MessageService {
 		});
 	}
 
-	async getMessagesById(username: string, isAdmin: boolean): Promise<Message[]> {
+	async getMessagesById(name: string, isAdmin: boolean): Promise<Message[]> {
 		if (typeof isAdmin === 'undefined') {
-			return this.messageModel.find({ username });
+			return this.messageModel.find({ name });
 		} else {
-			return this.messageModel.find({ username, isAdmin });
+			return this.messageModel.find({ name, isAdmin });
 		}
 	}
 
 	async setAllReadToTrue(id: string) {
-		return this.messageModel.updateMany({unread: true, username: id}, {unread: false});
+		return this.messageModel.updateMany({unread: true, name: id}, {unread: false});
 	}
 }

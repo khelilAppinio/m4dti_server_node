@@ -14,7 +14,7 @@ export class ImageUploadController {
 		@Body('data') data: string,
 		// * get sourceSocketId from client
 		@Body('sourceSocketId') sourceSocketId: string,
-		@Body('username') username: string,
+		@Body('name') name: string,
 		@Res() res: Response,
 	) {
 		// ! TODO: use regex to filter png|jpeg|jpg ..
@@ -23,7 +23,7 @@ export class ImageUploadController {
 		// ! TODO: verify image too large
 		const date = new Date().getTime();
 		let mediaUrl = await this.imageUploadService.saveImage(data);
-		this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, username);
+		this.chatGateway.sendMedia(mediaUrl, sourceSocketId, date, name);
 		return { mediaUrl };
 	}
 }

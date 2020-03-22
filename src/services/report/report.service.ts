@@ -60,7 +60,7 @@ export class ReportService {
 		}
 	}
 	async closeReport(user: User) {
-		return await this.reportModel.updateOne({ user_id: user.provider_user_id }, { current_status: 'closed' });
+		return await this.reportModel.updateOne({ user_id: user.provider_user_id, current_status: 'open' }, { $set: { 'current_status': 'closed' } });
 	}
 
 	async updatePosition(user: User, updatePositionDto: UpdatePositionDto) {

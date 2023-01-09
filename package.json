@@ -22,7 +22,7 @@
   "dependencies": {
     "@nestjs/common": "^6.10.14",
     "@nestjs/core": "^6.10.14",
-    "@nestjs/jwt": "^6.1.1",
+    "@nestjs/jwt": "^10.0.1",
     "@nestjs/mongoose": "^6.2.1",
     "@nestjs/passport": "^6.1.1",
     "@nestjs/platform-express": "^6.10.14",
@@ -35,7 +35,7 @@
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "passport-jwt": "^4.0.0",
+    "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^6.5.4",
